@@ -3,23 +3,18 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
 import json
 import os
-import serial
 import threading
 import time
 import requests
+from communicator import Communicator
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weights.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# SERIAL
-try:
-    arduino = serial.Serial('/dev/serial0', 9600, timeout=1)
-    print("Serial connection established.")
-except Exception as e:
-    print(f"Failed to connect to Arduino: {e}")
-    arduino = None
+# SERIAL COMMUNICATION WRAPPER
+communicator = Communicator('/dev/serial0', 9600)
 
 # Food status memory
 food_status = {"low": False}
@@ -75,8 +70,7 @@ def index():
         if "feed_now" in request.form:
             portions = int(request.form.get("portions", 1))
             print(f"Feeding {portions} portion(s)")
-            if arduino:
-                arduino.write(f"FEED:{portions}\n".encode())
+            communicator.send(f"FEED:{portions}")
         elif "add_schedule" in request.form:
             time_str = request.form["feed_time"]
             portions = int(request.form["feed_portions"])
@@ -187,24 +181,19 @@ def set_oled_mode():
     mode = request.form.get("mode")
     if mode in ["weight", "bongo"]:
         print(f"OLED mode set to: {mode}")
-        if arduino:
-            try:
-                arduino.write(f"MODE:{mode}\n".encode())
-            except Exception as e:
-                print(f"Error sending to Arduino: {e}")
+        communicator.send(f"MODE:{mode}")
     return redirect("/")
 
 def listen_to_arduino():
     while True:
         try:
-            if arduino and arduino.in_waiting:
-                line = arduino.readline().decode().strip()
+            line = communicator.read_line()
+            if line:
                 if line.startswith("WEIGHT:"):
                     weight_str = line.split(":")[1]
-                    if weight_str.isdigit():
+                    if weight_str.replace('.', '', 1).isdigit():
                         print(f"Received weight: {weight_str} g")
-                        requests.post("http://localhost:5000/log_weight", json={"weight": int(weight_str)})
-
+                        requests.post("http://localhost:5000/log_weight", json={"weight": float(weight_str)})
                 elif line.startswith("FOOD:"):
                     status = line.split(":")[1]
                     if status == "LOW":
@@ -213,7 +202,6 @@ def listen_to_arduino():
                     elif status == "OK":
                         food_status["low"] = False
                         print("Food is OK")
-
         except Exception as e:
             print(f"Error reading serial: {e}")
         time.sleep(0.2)
@@ -227,11 +215,7 @@ def buzzer_loop():
         if food_status["low"] and 8 <= hour < 18:
             if now.timestamp() - last_beep_time > 3600:
                 print("Sending BUZZ to Arduino")
-                if arduino:
-                    try:
-                        arduino.write(b"BUZZ\n")
-                    except Exception as e:
-                        print(f"Error sending BUZZ: {e}")
+                communicator.send("BUZZ")
                 last_beep_time = now.timestamp()
         time.sleep(60)
 
@@ -239,8 +223,7 @@ if __name__ == "__main__":
     if not os.path.exists("weights.db"):
         with app.app_context():
             db.create_all()
-    if arduino:
-        threading.Thread(target=listen_to_arduino, daemon=True).start()
+    threading.Thread(target=listen_to_arduino, daemon=True).start()
     threading.Thread(target=buzzer_loop, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
 
