@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block title %}Smart Pet Feeder{% endblock %}
+{% block content %}
+
+<h1>🐾 Smart Pet Feeder</h1>
+
+<!-- Food Status -->
+<div class="card" style="background-color: {{ 'red' if food_low else 'green' }}; color: white;">
+  <h2>Food Status: {{ 'LOW ❌' if food_low else 'OK ✅' }}</h2>
+</div>
+
+<!-- Portion Info -->
+<div class="card">
+  <p><strong>1 portion = {{ settings.portion_grams }}g</strong></p>
+
+  <!-- Manual Feeding -->
+  <form method="post">
+    <label for="portions">Feed now:</label>
+    <input type="number" name="portions" min="1" step="1" value="1" required>
+    <button type="submit" name="feed_now">Feed</button>
+  </form>
+</div>
+
+<!-- Cat Profile Summary -->
+{% if cat.name %}
+<div class="card">
+  <h2>{{ cat.name }}'s Profile</h2>
+  <ul>
+    <li><strong>Gender:</strong> {{ cat.gender }}</li>
+    <li><strong>Age:</strong> {{ age_years }} years</li>
+    {% if weight_kg %}
+      <li><strong>Latest Weight:</strong> {{ weight_kg }} kg</li>
+    {% endif %}
+    {% if bmi %}
+      <li>
+        <strong>BMI:</strong>
+        <span style="
+          color:
+            {% if bmi < 15 %}blue
+            {% elif bmi <= 25 %}lime
+            {% else %}orange
+            {% endif %};
+          font-weight: bold;">
+          {{ bmi }}
+        </span>
+      </li>
+    {% else %}
+      <li><em>BMI unavailable – missing weight or length.</em></li>
+    {% endif %}
+  </ul>
+</div>
+{% endif %}
+
+<!-- Scheduled Feedings -->
+<div class="card">
+  <h2>Scheduled Feedings</h2>
+
+  <form method="post">
+    <label>Time:</label>
+    <input type="time" name="feed_time" required>
+    <label>Portions:</label>
+    <input type="number" name="feed_portions" min="1" step="1" value="1" required>
+    <button type="submit" name="add_schedule">Add Time</button>
+  </form>
+
+  <ul>
+    {% for item in settings.schedule %}
+      <li>
+        {{ item.time }} – {{ item.portions }} portion{{ 's' if item.portions > 1 else '' }} ({{ item.portions * settings.portion_grams }}g)
+        <form method="post" style="display:inline;">
+          <input type="hidden" name="delete_time" value="{{ item.time }}">
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<!-- OLED Mode Control -->
+<div class="card">
+  <h2>OLED Display Mode</h2>
+  <form method="post" action="/set_oled_mode">
+    <button type="submit" name="mode" value="weight">Show Weight</button>
+    <button type="submit" name="mode" value="bongo">Show Bongo Cat</button>
+  </form>
+</div>
+
+{% endblock %}
+

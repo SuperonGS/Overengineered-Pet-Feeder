@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}Weight Graph{% endblock %}
+{% block content %}
+
+<h1>Weight & BMI Graph</h1>
+
+<div class="card">
+  <canvas id="weightChart" width="100%" height="50"></canvas>
+</div>
+
+<div class="card" style="text-align: center;">
+  <form method="post" action="/delete_weights" onsubmit="return confirm('Are you sure you want to delete all weight data? This cannot be undone.');">
+    <button type="submit" style="background-color: red; color: white;">Delete All Weight Data</button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  fetch('/weights_data')
+    .then(res => res.json())
+    .then(data => {
+      const timestamps = data.map(e => new Date(e.timestamp).toLocaleString());
+      const weightsKg = data.map(e => (e.weight / 1000).toFixed(2));
+      const bmis = data.map(e => e.bmi);
+
+      new Chart(document.getElementById('weightChart'), {
+        type: 'line',
+        data: {
+          labels: timestamps,
+          datasets: [
+            {
+              label: 'Weight (kg)',
+              data: weightsKg,
+              borderColor: '#ff6384',
+              backgroundColor: 'transparent',
+              tension: 0.2
+            },
+            {
+              label: 'BMI',
+              data: bmis,
+              borderColor: '#36a2eb',
+              backgroundColor: 'transparent',
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    });
+</script>
+
+{% endblock %}
+

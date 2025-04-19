@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Pet Feeder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding-top: 60px;
+            background-color: #f9f9f9;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #0b3965; /* Raspberry Pi blue alternative */
+            color: white;
+            padding: 10px 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        nav a {
+            color: white;
+            margin-right: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input, select {
+            padding: 6px;
+            margin: 6px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        hr {
+            margin: 30px 0;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        .navbar-title {
+            margin-right: auto;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-title span {
+            font-size: 20px;
+        }
+
+        .status-bar {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status-ok {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-low {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="navbar-title">
+            <span>🐾</span> Smart Pet Feeder
+        </div>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('cat') }}">Cat Profile</a>
+        <a href="{{ url_for('weights') }}">Weight Graph</a>
+        <a href="{{ url_for('settings') }}">Portion Settings</a>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
+

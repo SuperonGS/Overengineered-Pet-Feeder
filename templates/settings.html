@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Portion Settings{% endblock %}
+{% block content %}
+
+<h1>⚙️ Portion Settings</h1>
+
+<div class="card">
+  <form method="post">
+    <label>Grams per portion:</label>
+    <input type="number" name="portion_grams" min="1" value="{{ portion_grams }}" required>
+    <button type="submit">Save</button>
+  </form>
+</div>
+
+{% endblock %}
+
