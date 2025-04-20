@@ -1,6 +1,16 @@
-# Smart Pet Feeder - Raspberry Pi Setup Guide
+# Overengineered Pet Feeder - Raspberry Pi Setup Guide
 
 Welcome to the Smart Pet Feeder project! This guide will walk you through setting up your Raspberry Pi to run the pet feeder web interface, connect to WiFi, and make the interface accessible via [http://petfeeder.local:5000](http://petfeeder.local:5000). It also ensures the system auto-starts after reboot.
+
+## 📂 Repository Structure
+
+```
+pet_feeder_web/
+├── raspberry/   → Python Flask web interface (run this on the Raspberry Pi)
+├── arduino/     → Arduino sketch (upload to Arduino Nano)
+```
+
+---
 
 ## Requirements
 
@@ -47,22 +57,8 @@ Clone the repository:
 
 ```bash
 cd ~/Documents
-git clone https://github.com/YOUR_USERNAME/pet_feeder_web.git
-cd pet_feeder_web
-```
-
-Create virtual environment (optional but recommended):
-
-```bash
-sudo apt install python3-venv -y
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
+git clone https://github.com/YOUR_USERNAME/Overengineered-Pet-Feeder.git
+cd Overengineered-Pet-Feeder/raspberry
 ```
 
 Make sure you have:
@@ -135,4 +131,22 @@ It will automatically start after reboot or power loss.
 - You can modify feeding schedule and cat profile via the web interface.
 - Arduino should be connected and running the appropriate sketch to respond to serial commands.
 - Make sure `/dev/serial0` or `/dev/ttyUSB0` matches the device your Arduino is on.
+
+
+---
+
+## ✅ Features
+
+- 📅 Web-based feeding schedule
+- 🧠 Automatic weight tracking with 4 load cells
+- 📉 BMI monitoring & graphing
+- 🐱 Detects when the cat is eating
+- 🖥 OLED display with:
+  - Real-time weight
+  - Bongo Cat animation
+  - Refill and measuring status
+- 📡 Serial UART communication with simple ACK protocol
+- 🔊 Buzzer warning when food is low (daytime only)
+
+---
 
