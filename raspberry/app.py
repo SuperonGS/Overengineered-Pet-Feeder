@@ -6,7 +6,7 @@ import os
 import threading
 import time
 import requests
-from communicator import Communicator
+from communicator import UARTCommunicator
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weights.db'
@@ -14,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # SERIAL COMMUNICATION WRAPPER
-communicator = Communicator('/dev/serial0', 9600)
+communicator = UARTCommunicator('/dev/serial0', 9600)
 
 # Food status memory
 food_status = {"low": False}
@@ -187,13 +187,16 @@ def set_oled_mode():
 def listen_to_arduino():
     while True:
         try:
-            line = communicator.read_line()
-            if line:
+            messages = communicator.get_messages()
+            for line in messages:
                 if line.startswith("WEIGHT:"):
                     weight_str = line.split(":")[1]
-                    if weight_str.replace('.', '', 1).isdigit():
-                        print(f"Received weight: {weight_str} g")
-                        requests.post("http://localhost:5000/log_weight", json={"weight": float(weight_str)})
+                    try:
+                        weight_val = float(weight_str)
+                        print(f"Received weight: {weight_val} g")
+                        requests.post("http://localhost:5000/log_weight", json={"weight": weight_val})
+                    except ValueError:
+                        continue
                 elif line.startswith("FOOD:"):
                     status = line.split(":")[1]
                     if status == "LOW":

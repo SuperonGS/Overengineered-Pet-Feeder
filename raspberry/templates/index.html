@@ -5,8 +5,8 @@
 <h1>🐾 Smart Pet Feeder</h1>
 
 <!-- Food Status -->
-<div class="card" style="background-color: {{ 'red' if food_low else 'green' }}; color: white;">
-  <h2>Food Status: {{ 'LOW ❌' if food_low else 'OK ✅' }}</h2>
+<div class="status-bar {{ 'status-low' if food_low else 'status-ok' }}">
+  Food Status: {{ 'LOW ❌' if food_low else 'OK ✅' }}
 </div>
 
 <!-- Portion Info -->
